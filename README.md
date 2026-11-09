@@ -114,4 +114,6 @@ Total Remaining Budget: R1,250
 
 The Spending Tracker App provides a simple and user-friendly way to monitor daily and weekly expenses. By using parallel arrays, functions, loops, and calculations, the application demonstrates important Kotlin programming concepts while helping users understand and manage their spending.
 
+STUDENT NUMBER : ST10545803
+STUDENT NAME: TANIKA THOMPSON 
 The application encourages better budgeting habits and supports improved financial awareness.
