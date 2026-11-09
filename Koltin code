@@ -1,0 +1,328 @@
+
+package com.example.spendingtracker
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Color
+import kotlinx.coroutines.delay
+import com.example.spendingtracker.ui.theme.SpendingTrackerTheme
+
+// MAIN ACTIVITY
+
+class MainActivity : ComponentActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+            SpendingTrackerTheme {
+                SpendingTrackerApp(
+                    onExit = { finish() }
+                )
+            }
+        }
+    }
+}
+
+// FOUR PARALLEL ARRAYS
+
+val dates = arrayOf(
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday"
+)
+
+val dailyBudget = doubleArrayOf(
+    500.0, 400.0, 600.0, 500.0,
+    700.0, 800.0, 400.0
+)
+
+val dailySpent = doubleArrayOf(
+    350.0, 250.0, 400.0, 300.0,
+    550.0, 600.0, 200.0
+)
+
+val comments = arrayOf(
+    "Groceries",
+    "Transport",
+    "Shopping",
+    "Food",
+    "Clothes",
+    "Entertainment",
+    "Household"
+)
+
+// APP NAVIGATION
+
+@Composable
+fun SpendingTrackerApp(onExit: () -> Unit) {
+
+    var currentScreen by remember {
+        mutableStateOf("splash")
+    }
+
+    LaunchedEffect(Unit) {
+        delay(3000)
+        currentScreen = "home"
+    }
+
+    when (currentScreen) {
+
+        "splash" -> SplashScreen()
+
+        "home" -> MainScreen(
+            onView = { currentScreen = "view" },
+            onCalculate = { currentScreen = "calculate" },
+            onExit = onExit
+        )
+
+        "view" -> ViewSpendingScreen(
+            onBack = { currentScreen = "home" }
+        )
+
+        "calculate" -> CalculateScreen(
+            onBack = { currentScreen = "home" }
+        )
+    }
+}
+
+// SPLASH SCREEN
+
+@Composable
+fun SplashScreen() {
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+
+        Text("💰", fontSize = 75.sp)
+
+        Text(
+            text = "SPENDING LOG",
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text("Track your money. Manage your budget.")
+    }
+}
+
+// MAIN SCREEN
+
+@Composable
+fun MainScreen(
+    onView: () -> Unit,
+    onCalculate: () -> Unit,
+    onExit: () -> Unit
+) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+
+        Text(
+            text = "SPENDING LOG",
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+        Button(
+            onClick = onView,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("View All Spending")
+        }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        Button(
+            onClick = onCalculate,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Calculate Remaining Budget")
+        }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        Button(
+            onClick = onExit,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Exit App")
+        }
+    }
+}
+
+// VIEW ALL SPENDING SCREEN
+
+@Composable
+fun ViewSpendingScreen(onBack: () -> Unit) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
+    ) {
+
+        Text(
+            text = "WEEKLY SPENDING DETAILS",
+            fontSize = 23.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        for (i in dates.indices) {
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 5.dp)
+            ) {
+
+                Column(
+                    modifier = Modifier.padding(15.dp)
+                ) {
+
+                    Text(
+                        text = "Date: ${dates[i]}",
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Text("Daily Budget: R${dailyBudget[i]}")
+
+                    Text("Daily Spent: R${dailySpent[i]}")
+
+                    Text("Comment: ${comments[i]}")
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onBack,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Back to Main Screen")
+        }
+    }
+}
+
+// CALCULATE REMAINING BUDGET SCREEN
+
+@Composable
+fun CalculateScreen(onBack: () -> Unit) {
+
+    val remainingAmounts = DoubleArray(7) { i ->
+        dailyBudget[i] - dailySpent[i]
+    }
+
+    val weeklyRemaining = remainingAmounts.sum()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
+    ) {
+
+        Text(
+            text = "REMAINING BUDGET",
+            fontSize = 25.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        for (i in dates.indices) {
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 5.dp)
+            ) {
+
+                Column(
+                    modifier = Modifier.padding(15.dp)
+                ) {
+
+                    Text(
+                        text = dates[i],
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Text("Budget: R${dailyBudget[i]}")
+
+                    Text("Spent: R${dailySpent[i]}")
+
+                    Text(
+                        text = "Remaining: R${remainingAmounts[i]}",
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFFE0F2E9)
+            )
+        ) {
+
+            Column(
+                modifier = Modifier.padding(20.dp)
+            ) {
+
+                Text(
+                    text = "TOTAL WEEKLY REMAINING",
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = "R$weeklyRemaining",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Button(
+            onClick = onBack,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Back to Main Screen")
+        }
+    }
+}
